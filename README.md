@@ -1,7 +1,6 @@
 # REGISTRATION_PDO
 
-Study register and login form with php_pdo from MilerDev Channel
-
+Study PHP registration system with PDO
 URL: https://www.youtube.com/watch?v=Oel6e5GBDXg
 
-Credit: MilerDev Channel
+Credit: Patiphan Phengpao Channel (MilerDev)
