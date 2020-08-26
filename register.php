@@ -1,46 +1,47 @@
 <?php
-    require_once("connection.php");
-    echo $_REQUEST['btn_register'];
+require_once("connection.php");
 
-    if (isset($_REQUEST["btn_register"])) {
-        $username = strip_tags($_REQUEST["txt_username"]);
-        $email = strip_tags($_REQUEST["txt_email"]);
-        $password = strip_tags($_REQUEST["txt_password"]);
+if (isset($_REQUEST["btn_register"])) {
+    $username = strip_tags($_REQUEST["txt_username"]);
+    $email = strip_tags($_REQUEST["txt_email"]);
+    $password = strip_tags($_REQUEST["txt_password"]);
 
-        if (empty($username)) {
-            $errorMsg[] = "Please enter username";
-        } else if (empty($email)) {
-            $errorMsg[] = "Please enter email";
-        } else if (empty($password)) {
-            $errorMsg[] = "Please enter password";
-        } else if (strlen($password) < 6) {
-            $errorMsg[] = "Password must be at least 6 characters";
-        } else {
-            try {
-                $select_stmt = $db->prepare("SELECT username, email FROM tbl_user WHERE username = :uname OR email = :uemail");
-                $select_stmt->execute(array(':uname' => $username, ':uemail' => $email));
-                $row = $select_stmt->fetch(PDO::FETCH_ASSOC);
+    if (empty($username)) {
+        $errorMsg[] = "Please enter username";
+    } else if (empty($email)) {
+        $errorMsg[] = "Please enter email";
+    } else if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errorMsg[] = "Please enter a valid email address";
+    } else if (empty($password)) {
+        $errorMsg[] = "Please enter password";
+    } else if (strlen($password) < 6) {
+        $errorMsg[] = "Password must be at least 6 characters";
+    } else {
+        try {
+            $select_stmt = $db->prepare("SELECT username, email FROM tbl_user WHERE username = :uname OR email = :uemail");
+            $select_stmt->execute(array(':uname' => $username, ':uemail' => $email));
+            $row = $select_stmt->fetch(PDO::FETCH_ASSOC);
 
-                if ($row['username'] == $username) {
-                    $errorMsg[] = "Sorry username already exists";
-                } else if ($row['email'] == $email) {
-                    $errorMsg[] = "Sorry email already exists";
-                } else if (!isset($errorMsg)) {
-                    $new_password = password_hash($password, PASSWORD_DEFAULT);
-                    $insert_stmt = $db->prepare("INSERT INTO tbl_user(username, password, email) VALUES(:uname, :upassword, :uemail)");
-                    if ($insert_stmt->execute(array(
-                        ':uname' => $username, 
-                        ':upassword' => $new_password, 
-                        ':uemail' => $email
-                    ))) {
-                        $registerMsg = "Register successfully...Please click on login account link";
-                    }
+            if ($row['username'] == $username) {
+                $errorMsg[] = "Sorry username already exists";
+            } else if ($row['email'] == $email) {
+                $errorMsg[] = "Sorry email already exists";
+            } else if (!isset($errorMsg)) {
+                $new_password = password_hash($password, PASSWORD_DEFAULT);
+                $insert_stmt = $db->prepare("INSERT INTO tbl_user(username, password, email) VALUES(:uname, :upassword, :uemail)");
+                if ($insert_stmt->execute(array(
+                    ':uname' => $username,
+                    ':upassword' => $new_password,
+                    ':uemail' => $email
+                ))) {
+                    $registerMsg = "Register successfully...Please click on login account link";
                 }
-            } catch(PDOException $e) {
-                echo $e->getMessage();
             }
+        } catch (PDOException $e) {
+            $e->getMessage();
         }
     }
+}
 ?>
 
 <!DOCTYPE html>
@@ -57,6 +58,28 @@
 
     <div class="container text-center">
         <h1 class="mt-5">Register Page</h1>
+
+        <?php
+        if (isset($errorMsg)) {
+            foreach ($errorMsg as $error) {
+        ?>
+                <div class="alert alert-danger">
+                    <strong><?php echo $error; ?></strong>
+                </div>
+        <?php
+            }
+        }
+        ?>
+
+        <?php
+        if (isset($registerMsg)) {
+        ?>
+            <div class="alert alert-success">
+                <?php echo $registerMsg; ?>
+            </div>
+        <?php
+        }
+        ?>
 
         <form action="" class="form-horizontal mt-3" method="post">
             <div class="form-group">

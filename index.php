@@ -1,3 +1,53 @@
+<?php
+require_once("connection.php");
+session_start();
+
+if (isset($_SESSION["user_login"])) {
+    header("location: welcome.php");
+}
+
+if (isset($_REQUEST["btn_login"])) {
+    $username = strip_tags($_REQUEST["txt_username"]);
+    $email = strip_tags($_REQUEST["txt_username"]);
+    $password = strip_tags($_REQUEST["txt_password"]);
+
+    if (empty($username)) {
+        $errorMsg[] = "Please enter username or email";
+    } else if (empty($email)) {
+        $errorMsg[] = "Please enter username or email";
+    } else if (empty($password)) {
+        $errorMsg[] = "Please enter password";
+    } else {
+        try {
+            $select_stmt = $db->prepare("SELECT * FROM tbl_user WHERE username = :uname OR email = :uemail");
+            $select_stmt->execute(array(
+                ':uname' => $username,
+                ':uemail' => $email
+            ));
+            $row = $select_stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($select_stmt->rowCount() > 0) {
+                if ($username == $row["username"] or $email == $row["email"]) {
+                    if (password_verify($password, $row["password"])) {
+                        $_SESSION["user_login"] = $row["row_id"];
+                        $loginMsg = "Successfully Login";
+                        header("refresh:2;welcome.php");
+                    } else {
+                        $errorMsg[] = "Wrong Password";
+                    }
+                } else {
+                    $errorMsg[] = "Wrong Username or Email";
+                }
+            } else {
+                $errorMsg[] = "Wrong Username or Email";
+            }
+        } catch (PDOException $e) {
+            $e->getMessage();
+        }
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -12,6 +62,28 @@
 
     <div class="container text-center">
         <h1 class="mt-5">Login Page</h1>
+
+        <?php
+        if (isset($errorMsg)) {
+            foreach ($errorMsg as $error) {
+        ?>
+                <div class="alert alert-danger mt-3">
+                    <?php echo $error; ?>
+                </div>
+        <?php
+            }
+        }
+        ?>
+
+        <?php
+        if (isset($loginMsg)) {
+        ?>
+            <div class="alert alert-success mt-3">
+                <?php echo $loginMsg; ?>
+            </div>
+        <?php
+        }
+        ?>
 
         <form action="" class="form-horizontal mt-3" method="post">
             <div class="form-group">
