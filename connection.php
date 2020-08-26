@@ -12,5 +12,4 @@ try {
     echo $e->getMessage();
 }
 
-// connection.php
 ?>
