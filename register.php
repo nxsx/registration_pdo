@@ -129,3 +129,7 @@ if (isset($_REQUEST["btn_register"])) {
 </body>
 
 </html>
+
+<?php
+// register.php
+?>
