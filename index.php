@@ -125,3 +125,7 @@ if (isset($_REQUEST["btn_login"])) {
 </body>
 
 </html>
+
+<?php
+// index.php
+?>
