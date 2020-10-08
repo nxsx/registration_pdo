@@ -20,19 +20,16 @@ if (isset($_REQUEST["btn_register"])) {
         try {
             $select_stmt = $db->prepare("SELECT username, email FROM tbl_user WHERE username = :uname OR email = :uemail");
             $select_stmt->execute(array(':uname' => $username, ':uemail' => $email));
-            $row = $select_stmt->fetch(PDO::FETCH_ASSOC);
-
-            if ($row['username'] == $username) {
-                $errorMsg[] = "Sorry username already exists";
-            } else if ($row['email'] == $email) {
-                $errorMsg[] = "Sorry email already exists";
-            } else if (!isset($errorMsg)) {
+            
+            if ($select_stmt->rowCount() > 0) {
+                $errorMsg[] = "Sorry username or email already exists";
+            } else {
                 $new_password = password_hash($password, PASSWORD_DEFAULT);
-                $insert_stmt = $db->prepare("INSERT INTO tbl_user(username, password, email) VALUES(:uname, :upassword, :uemail)");
+                $insert_stmt = $db->prepare("INSERT INTO tbl_user(username, password, email) VALUES(:username, :password, :email)");
                 if ($insert_stmt->execute(array(
-                    ':uname' => $username,
-                    ':upassword' => $new_password,
-                    ':uemail' => $email
+                    ':username' => $username,
+                    ':password' => $new_password,
+                    ':email' => $email
                 ))) {
                     $registerMsg = "Register successfully...Please click on login account link";
                 }

@@ -2,7 +2,7 @@
 
 $db_host = "localhost";
 $db_user = "root";
-$db_password = "";
+$db_password = "nopassword";
 $db_name = "registration_pdo";
 
 try {
